@@ -1,0 +1,13 @@
+{
+    "name": "zgredek/engine",
+    "description": "Zgredek Engine",
+    "version": "0.0.1-alpha",
+    "autoload": {
+        "psr-4": {
+            "ZgredekEngine\\": "engine/"
+        },
+        "files": [
+            "engine/Systems/checkCollisions.php"
+        ]
+    }
+}
