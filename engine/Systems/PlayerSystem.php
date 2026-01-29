@@ -7,16 +7,25 @@ use ZgredekEngine\Input\Interfaces\Action;
 use ZgredekEngine\Managers\Characters\Interfaces\Direction;
 use ZgredekEngine\Managers\Characters\PlayerManager;
 use ZgredekEngine\State\CharacterState;
+use ZgredekEngine\State\States;
 
+/**
+ * @todo - Player System should be in Manager 
+ */
 class PlayerSystem
 {
     private float $speed = 200.0;
-    
+
+    private CharacterState $characterState; 
+    private TextureState $textureState;
+
     public function __construct(
         public PlayerManager $playerManager,
-        private CharacterState $characterState, 
-        private TextureState $textureState,
-    ) {}
+        States $states,    
+    ) {
+        $this->characterState = $states->characterState;
+        $this->textureState = $states->textureState;
+    }
 
     public function update(int $actions, float $deltaTime): void
     {
@@ -47,10 +56,10 @@ class PlayerSystem
                 return;
             }
 
-            $newX = $this->playerManager->getX() + ($dx * $this->speed * $deltaTime);
-            $newY = $this->playerManager->getY() + ($dy * $this->speed * $deltaTime);
+            $newX = $this->playerManager->x + ($dx * $this->speed * $deltaTime);
+            $newY = $this->playerManager->y + ($dy * $this->speed * $deltaTime);
 
-            $this->playerManager->setPosition($newX, $newY);    
+            $this->playerManager->setPosition($newX, $newY, $deltaTime);
         }
     }
 }

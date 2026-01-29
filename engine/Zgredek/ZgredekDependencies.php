@@ -16,12 +16,10 @@ use ZgredekEngine\Systems\PlayerSystem;
 
 class ZgredekDependencies {
     public function __construct(
+        public readonly Libraries $libraries,
         public readonly WindowManager $windowManager,
-        public readonly GameController $gameController,
         public readonly PlayerSystem $playerSystem,
-        public readonly Renderer $renderer,
-        public readonly CharacterState $characterState,
-        public readonly TextureState $textureState,
+        public readonly States $states,
         public readonly CharacterTextureLoader $characterTextureLoader
     ) {}
 
@@ -35,19 +33,17 @@ class ZgredekDependencies {
         $states = new States(
             new CharacterState(),
             new TextureState()
-        )
-        $windowManager = new WindowManager($libraries, new Renderer());
+        );
+        $windowManager = new WindowManager($libraries, new Renderer($libraries), new GameController($libraries->sdl));
 
-        $textureLoader = new CharacterTextureLoader($sdl, $sdlImage, $windowManager, $textureState);        
-        $playerManager = new PlayerManager($textureLoader, $characterState);
+        $textureLoader = new CharacterTextureLoader($libraries, $states->textureState);        
+        $playerManager = new PlayerManager($textureLoader, $states);
 
         return new self(
+            $libraries,
             $windowManager,
-            new GameController($sdl),
-            new PlayerSystem($playerManager, $characterState, $textureState),
-            $renderer,
-            $characterState,
-            $textureState,
+            new PlayerSystem($playerManager, $states),
+            $states,
             $textureLoader
         );
     }

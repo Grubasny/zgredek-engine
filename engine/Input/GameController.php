@@ -3,11 +3,12 @@
 namespace ZgredekEngine\Input;
 
 use FFI;
-use SDL2Interface;
+use FFI\CData;
 use ZgredekEngine\Exceptions\SDLNewException;
 use ZgredekEngine\Input\Interfaces\Action;
 use ZgredekEngine\Input\Interfaces\Event;
 use ZgredekEngine\Input\Interfaces\Key;
+use ZgredekEngine\Lib\SDL2Interface;
 
 class GameController {
     private array $actionStates = [
@@ -20,11 +21,11 @@ class GameController {
         Action::DEBUG => false,
     ];
 
-    private $event;
-    private $eventAddr;
+    private ?CData $event;
+    private ?CData $eventAddr;
 
     /**
-     * @param SDL2Interface $sdl
+     * @param SDL2Interface|FFI $sdl
      */
     public function __construct(private $sdl) {
         $this->event = $sdl->new('SDL_Event') ?? throw new SDLNewException('SDL_Event', $sdl);

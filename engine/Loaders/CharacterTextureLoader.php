@@ -7,6 +7,9 @@ use ZgredekEngine\State\TextureState;
 use ZgredekEngine\Exceptions\SDLImgLoadException;
 use ZgredekEngine\Exceptions\SDLWindowNotInitializedException;
 use ZgredekEngine\Exceptions\TextureNotRegisteredException;
+use ZgredekEngine\Lib\Libraries;
+use ZgredekEngine\Lib\SDL2ImageInterface;
+use ZgredekEngine\Lib\SDL2Interface;
 use ZgredekEngine\Zgredek\WindowManager;
 
 class CharacterTextureLoader
@@ -16,12 +19,19 @@ class CharacterTextureLoader
     private array $rawFrames    = [];
     private int $nextTextureId = 1;
 
+    /** @var SDL2Interface $sdl */
+    private $sdl;
+
+    /** @var SDL2ImageInterface $sdlImage */
+    private $sdlImage;
+
     public function __construct(
-        private $sdl, 
-        private $sdlImage,
-        private WindowManager $windowManager,
+        Libraries $libraries,
         private TextureState $textureState
-    ) {}
+    ) {
+        $this->sdl = $libraries->sdl;
+        $this->sdlImage = $libraries->sdlImage;
+    }
 
     public function registerTexture(string $textureName, string $path): int
     {
@@ -51,29 +61,30 @@ class CharacterTextureLoader
             ?? throw new TextureNotRegisteredException($textureName);
 
         for ($i = 0; $i < $count; $i++) {
-            $bitKey = $characterId << 4 | ($direction & 0xF);
-
-            if (!isset($this->rawFrames[$textureId][$bitKey])) {
-                $this->rawFrames[$textureId][$bitKey] = [
+            if (!isset($this->rawFrames[$textureId][$direction])) {
+                $this->rawFrames[$textureId][$direction] = [
                     'count' => $count,
-                    'frames' => []
+                    'frames' => [],
+                    'characters' => [],
                 ]; 
             }
 
-            $this->rawFrames[$textureId][$bitKey]['frames'][] = [
+            $this->rawFrames[$textureId][$direction]['frames'][] = [
                 $startX + ($i * $width), 
                 $startY,
                 $width,
                 $height,
             ];
+
+            $this->rawFrames[$textureId][$direction]['characters'][] = $characterId;
         }
     }
 
-    public function bake(): TextureState
+    public function bake($sdlRenderer): TextureState
     {
         $sdl = $this->sdl;
         $sdlImage = $this->sdlImage;
-        $sdlRenderer = $this->windowManager->sdlRenderer ?? throw new SDLWindowNotInitializedException($this->sdl);
+        $sdlRenderer = $sdlRenderer;
 
         $textureMap = $this->textureMap;
         $texturePaths = $this->texturePaths;
@@ -108,16 +119,14 @@ class CharacterTextureLoader
                 continue;
             }
 
-            foreach($rawFrames[$textureId] as $bitKey => $rawFrame) {
+            foreach($rawFrames[$textureId] as $direction => $rawFrame) {
                 $fCount = $rawFrame['count'];
                 $frames = $rawFrame['frames'];
+                $characters = $rawFrame['characters'];
 
+                $bitKey = ($textureId << 4) | ($direction & 0xF);
                 $directionOffset[$bitKey] = $globalIdx;
 
-                /**
-                 * @todo do not duplicate textures data
-                 */
-                $characterTextures[$bitKey] = $textureId;
                 $frameCount[$bitKey] = $fCount;
                 
                 foreach ($frames as $frame) {
@@ -127,6 +136,11 @@ class CharacterTextureLoader
                     $rectH[$globalIdx] = $frame[3];
 
                     $globalIdx++;
+                }
+
+                foreach ($characters as $characterId) {
+                    $characterBitKey = ($characterId << 4) | ($direction & 0xF);
+                    $characterTextures[$characterBitKey] = $textureId;
                 }
             }
         }

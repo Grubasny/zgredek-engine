@@ -26,23 +26,33 @@ class Zgredek
         int $height = WindowManager::DEFAULT_WINDOW_HEIGHT, 
         bool $fullscreen = true
     ): void {
-        $sdl = $this->dependencies->windowManager->sdl;
-        $renderer = $this->dependencies->renderer;
-        $gameController = $this->dependencies->gameController;
-        $playerSystem = $this->dependencies->playerSystem;
+        $dependencies = $this->dependencies;
 
-        $characterState = $this->dependencies->characterState;
-        $textureState = $this->dependencies->textureState;
+        $libraries = $dependencies->libraries;
+        $libSdl = $libraries->sdl;
+        $libSdlImage = $libraries->sdlImage;
 
-        $this->dependencies->windowManager->init($title, $width, $height, $fullscreen);
+        $states = $dependencies->states;
+        $characterState = $states->characterState;
+        $textureState = $states->textureState;
+        
+        $windowManager = $dependencies->windowManager;
+        
+        $gameController = $windowManager->gameController;
+        $playerSystem = $dependencies->playerSystem;
+        $playetManager = $playerSystem->playerManager;
 
+        $renderer = $windowManager->renderer;
+        [$window, $sdlRenderer] = $windowManager->init($title, $width, $height, $fullscreen);
+
+        $dependencies->characterTextureLoader->bake($sdlRenderer);
+        $playetManager->init();
+        
         $running = true;
-        $lastTime = $sdl->SDL_GetTicks();
-
-        $this->dependencies->characterTextureLoader->bake();
+        $lastTime = $libSdl->SDL_GetTicks();
 
         while ($running) {
-            $currentTime = $sdl->SDL_GetTicks();
+            $currentTime = $libSdl->SDL_GetTicks();
             $deltaTime = ($currentTime - $lastTime) / 1000.0;
             $lastTime = $currentTime;
 
@@ -57,11 +67,11 @@ class Zgredek
 
             $playerSystem->update($actions, $deltaTime);
 
-            $renderer->clear();
-            $renderer->drawCharacters($characterState, $textureState);
-            $renderer->present();
+            $renderer->clear($sdlRenderer);
+            $renderer->drawCharacters($sdlRenderer, $states);
+            $renderer->present($sdlRenderer);
 
-            usleep(1000); 
+            usleep(5000); 
         }
     }
 

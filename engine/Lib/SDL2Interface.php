@@ -2,6 +2,8 @@
 
 namespace ZgredekEngine\Lib;
 
+use FFI\CData;
+
 /**
  * @method int    SDL_Init(int $flags)
  * @method object SDL_CreateWindow(string $title, int $x, int $y, int $w, int $h, int $flags)
@@ -19,9 +21,6 @@ namespace ZgredekEngine\Lib;
  * @method int    SDL_RenderSetLogicalSize(object $renderer, int $w, int $h)
  * @method int    SDL_GetTicks() 
  * @method int    SDL_GetTicks64() 
- *
- * @method static ?FFI\CData new($type, bool $owned = true, bool $persistent = false)
- * @method static FFI\CData addr(CData $cdata)
  */
 interface SDL2Interface
 {

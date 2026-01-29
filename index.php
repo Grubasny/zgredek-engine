@@ -6,33 +6,41 @@ use ZgredekEngine\Zgredek\Zgredek;
 require_once __DIR__ . '/engine/bootstrap.php';
 
 $zgredek = new Zgredek();
+
+$texturePath = $zgredek->characterPath('zgredek.png');
+$textureName = 'zgredek';
 $playerManager = $zgredek->setupPlayer();
-$playerManager->registerTexture($zgredek->characterPath('wloczykij-removebg-preview.png'), 'player');
+$playerManager->registerTexture($texturePath, $textureName);
 
 $topPadding = 58;
 $height = 127;
 $width = 123;
 
-$playerManager->setupTextureHorizontalGrid(
-    'player', 
-    Direction::IDLE,
-    0, $topPadding,
-    $width, $height,
-    4
-);
-$playerManager->setupTextureHorizontalGrid(
-    'player', 
-    Direction::LEFT,
-    0, $topPadding + $height,
-    $width, $height,
-    4
-);
-$playerManager->setupTextureHorizontalGrid(
-    'player', 
+$box = 300;
+
+$zgredekSpriteSheetdirections = [
+    Direction::UP,
     Direction::RIGHT,
-    0, $topPadding + $height * 2,
-    $width, $height,
-    4
+    Direction::LEFT,
+    Direction::DOWN,
+];
+
+foreach ($zgredekSpriteSheetdirections as $key => $direction) {
+    $playerManager->setupTextureHorizontalGrid(
+        $textureName, 
+        $direction,
+        0, $box * $key,
+        $box, $box,
+        6
+    );
+}
+
+$playerManager->setupTextureHorizontalGrid(
+    $textureName, 
+    Direction::IDLE,
+    0, $box * $key,
+    $box, $box,
+    6
 );
 
 $zgredek->run();

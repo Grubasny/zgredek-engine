@@ -7,7 +7,8 @@
             "ZgredekEngine\\": "engine/"
         },
         "files": [
-            "engine/Systems/checkCollisions.php"
+            "engine/Systems/checkCollisions.php",
+            "engine/Logger/logger.php"
         ]
     }
 }

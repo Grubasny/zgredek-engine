@@ -12,6 +12,9 @@ class CharacterState {
     public array $y = [];
     public array $direction = [];
     public array $currentFrame = [];
+    public array $currentFrameTime = [];
+    public array $hp = [];
+    public array $maxHp = [];
 
     /**
      * @todo keep information about free IDs when delete records
@@ -25,6 +28,9 @@ class CharacterState {
         $this->y[$id] = 0;
         $this->direction[$id] = Direction::IDLE;
         $this->currentFrame[$id] = 0;
+        $this->currentFrameTime[$id] = 0;
+        $this->hp[$id] = 0;
+        $this->maxHp[$id] = 0;
 
         return $id;
     }

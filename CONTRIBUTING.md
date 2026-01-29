@@ -17,7 +17,7 @@ This engine is built for performance. When adding new entity states or systems:
     * **OOP (Object-Oriented Programming):** Used for configuration, game logic definition, and creative workflow (Blueprints). It ensures the engine is intuitive and developer-friendly.
     * **DOD (Data-Oriented Design):** Used for the core engine execution. Entity states are stored in flat 1D arrays to maximize CPU cache hits and minimize PHP garbage collector overhead.
     * **Low-Level Integration:** Direct C bindings via PHP FFI for SDL2 rendering and event handling.
-    * **Entity System:** High-level OOP Blueprints are "baked" into optimized DOD structures for high-performance runtime execution. (currently in progress)
+    * **Entity System:** High-level OOP Blueprints are "baked" into optimized DOD structures for high-performance runtime execution.
 
 ## Licensing & Ownership
 By submitting a Pull Request, you agree to license your contribution under the **GNU General Public License v3 (GPL-3.0)**.

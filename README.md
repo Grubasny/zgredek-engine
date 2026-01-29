@@ -14,8 +14,8 @@ Project is currently 1 week old and undergoing rapid development.
 - [x] Basic Player Handling & Input Mapping
 - [x] Game Controller (Action-based Input Drivers)
 - [x] Collision System (AABB / Grid-based)
-- [ ] Mob Management (Massive entity spawning)
-- [ ] NPC System (State-driven actors)
+- [] Mob Management (Massive entity spawning)
+- [] NPC System (State-driven actors)
 - [ ] Auto-Dicing Sprite Analysis (Coming soon)
 - [x] Linux Build (Docker/Native)
 - [ ] Windows Build (.exe standalone)

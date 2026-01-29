@@ -23,12 +23,13 @@ class WindowManager {
     public const DEFAULT_WINDOW_WIDTH = 1280;
     public const DEFAULT_WINDOW_HEIGHT = 720;
 
-    public $window;
-    public $sdlRenderer;
+    public $window = null;
+    public $sdlRenderer = null;
 
     public function __construct(
         public Libraries $libraries,
-        public Renderer $renderer
+        public Renderer $renderer,
+        public GameController $gameController
     ) {}
 
     public function init(
@@ -36,7 +37,11 @@ class WindowManager {
         int $width = self::DEFAULT_WINDOW_WIDTH, 
         int $height = self::DEFAULT_WINDOW_HEIGHT, 
         bool $fullscreen = false
-    ) {
+    ): array {
+        if ($this->sdlRenderer !== null) {
+            return [$this->window, $this->sdlRenderer];
+        }
+
         $sdl = $this->libraries->sdl;
         if ($sdl->SDL_Init(0x00000020 | 0x00004000) < 0) {
             throw new SDLInitException($sdl);
@@ -49,7 +54,8 @@ class WindowManager {
 
         $this->window = $sdl->SDL_CreateWindow(
             $title, 
-            self::SDL_WINDOWPOS_CENTERED_MASK, self::SDL_WINDOWPOS_CENTERED_MASK, 
+            self::SDL_WINDOWPOS_CENTERED_MASK, 
+            self::SDL_WINDOWPOS_CENTERED_MASK, 
             $width, $height, 
             $flags
         );
@@ -69,6 +75,8 @@ class WindowManager {
         }
         
         $sdl->SDL_RenderSetLogicalSize($this->sdlRenderer, $width, $height);
+
+        return [$this->window, $this->sdlRenderer];
     }
 
     public function __destruct() {
@@ -77,5 +85,13 @@ class WindowManager {
         $sdl->SDL_DestroyRenderer($this->sdlRenderer);
         $sdl->SDL_DestroyWindow($this->window);
         $sdl->SDL_Quit();
+
+        print PHP_EOL . PHP_EOL . PHP_EOL 
+            . "\t    Bye!" . PHP_EOL 
+            . "\t  Bye! Bye!" . PHP_EOL 
+            . "\tBye! Bye! Bye!" . PHP_EOL 
+            . "\t  Bye! Bye!" . PHP_EOL 
+            . "\t    Bye!" . PHP_EOL 
+            . PHP_EOL. PHP_EOL;
     }
 }

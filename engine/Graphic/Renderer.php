@@ -2,13 +2,12 @@
 
 namespace ZgredekEngine\Graphic;
 
+use DateTime;
 use FFI;
-use ZgredekEngine\State\TextureState;
 use ZgredekEngine\Exceptions\SDLNewException;
-use ZgredekEngine\Exceptions\SDLWindowNotInitializedException;
 use ZgredekEngine\Lib\Libraries;
 use ZgredekEngine\Lib\SDL2Interface;
-use ZgredekEngine\State\CharacterState;
+use ZgredekEngine\State\States;
 use ZgredekEngine\Zgredek\WindowManager;
 
 class Renderer {
@@ -27,36 +26,34 @@ class Renderer {
      * @param SDL2Interface $sdl
      * @param WindowManager $sdlRenderer
      */
-    public function __construct($sdl, private WindowManager $windowManager) {
+    public function __construct(Libraries $libraries) {
+        $sdl = $libraries->sdl;
         $this->sdl = $sdl;
 
-        $this->rectSource = $this->sdl->new('SDL_Rect') 
+        $this->rectSource = $sdl->new('SDL_Rect') 
             ?? throw new SDLNewException('SDL_Rect', $sdl);
 
-        $this->rectDestination = $this->sdl->new('SDL_Rect') 
+        $this->rectDestination = $sdl->new('SDL_Rect') 
             ?? throw new SDLNewException('SDL_Rect', $sdl);
 
         $this->rectSourceAddr = FFI::addr($this->rectSource);
         $this->rectDestinationAddr = FFI::addr($this->rectDestination);
     }
 
-    public function clear(): void 
+    public function clear($sdlRenderer): void 
     {
-        $this->sdl->SDL_RenderClear(
-            $this->windowManager->sdlRenderer ?? throw new SDLWindowNotInitializedException($this->sdl)
-        );
+        $this->sdl->SDL_RenderClear($sdlRenderer);
     }
 
-    public function present(): void 
+    public function present($sdlRenderer): void 
     {
-        $this->sdl->SDL_RenderPresent(
-            $this->windowManager->sdlRenderer ?? throw new SDLWindowNotInitializedException($this->sdl)
-        );
+        $this->sdl->SDL_RenderPresent($sdlRenderer);
     }
 
-    public function drawCharacters(Libraries $libraries, CharacterState $characterState, TextureState $textureState): void 
+    public function drawCharacters($sdlRenderer, States $states): void 
     {
-        $sdlRenderer = $this->windowManager->sdlRenderer ?? throw new SDLWindowNotInitializedException($this->sdl);
+        $characterState = $states->characterState;
+        $textureState = $states->textureState;
 
         $active = $characterState->active;
         $xArr = $characterState->x;
@@ -84,34 +81,35 @@ class Renderer {
         $rectDestinationAddr = $this->rectDestinationAddr;
 
         foreach ($active as $id => $isActive) {
-            $bitKey = ($id << 4) | ($direction[$id] & 0xF);
+            $currentDirection = $direction[$id];
+            $characterBitKey = ($id << 4) | ($currentDirection & 0xF);
 
-            if (!$isActive || !isset($characterTextures[$bitKey]) || $characterTextures[$bitKey] === -1) {
+            if (!$isActive || !isset($characterTextures[$characterBitKey]) || $characterTextures[$characterBitKey] === -1) {
                 continue;
             }
 
-            $textureId = $characterTextures[$bitKey];
+            $textureId = $characterTextures[$characterBitKey];
             $texture = $textures[$textureId] ?? null;
             
             if (!$texture) {
                 continue;
             }
 
-            $bitKeyFrame = $directionOffset[$bitKey] + $currentFrame[$id]; 
+            $textureBitKey = ($textureId << 4) | ($currentDirection & 0xF);
+            $textureBitKeyFrame = $directionOffset[$textureBitKey] + $currentFrame[$id]; 
 
-            print "CURRENT FRAME: {$currentFrame[$id]}\n\n";
             $dx = (int)$xArr[$id];
             $dy = (int)$yArr[$id];
-            $w = $rectW[$bitKeyFrame];
-            $h = $rectH[$bitKeyFrame];
+            $w = $rectW[$textureBitKeyFrame];
+            $h = $rectH[$textureBitKeyFrame];
 
             if ($dx + $w < 0 || $dx > $screenWidth || 
                 $dy + $h < 0 || $dy > $screenHeight) {
                 continue;
             }
 
-            $rectSource->x = $rectX[$bitKeyFrame];
-            $rectSource->y = $rectY[$bitKeyFrame];
+            $rectSource->x = $rectX[$textureBitKeyFrame];
+            $rectSource->y = $rectY[$textureBitKeyFrame];
             $rectSource->w = $w;
             $rectSource->h = $h;
 
